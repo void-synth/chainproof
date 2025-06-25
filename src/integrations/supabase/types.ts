@@ -6,10 +6,137 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          id: string
+          email: string | null
+          full_name: string | null
+          company: string | null
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email?: string | null
+          full_name?: string | null
+          company?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string | null
+          full_name?: string | null
+          company?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      content: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          type: string
+          storage_path: string | null
+          status: string
+          protection_score: number
+          blockchain_hash: string | null
+          ipfs_hash: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          type: string
+          storage_path?: string | null
+          status?: string
+          protection_score?: number
+          blockchain_hash?: string | null
+          ipfs_hash?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          type?: string
+          storage_path?: string | null
+          status?: string
+          protection_score?: number
+          blockchain_hash?: string | null
+          ipfs_hash?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          message: string
+          read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          message: string
+          read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          message?: string
+          read?: boolean
+          created_at?: string
+        }
+      }
+      user_settings: {
+        Row: {
+          user_id: string
+          email_notifications: boolean
+          auto_protection: boolean
+          two_factor_auth: boolean
+          api_key: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          email_notifications?: boolean
+          auto_protection?: boolean
+          two_factor_auth?: boolean
+          api_key?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          email_notifications?: boolean
+          auto_protection?: boolean
+          two_factor_auth?: boolean
+          api_key?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
