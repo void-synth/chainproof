@@ -212,9 +212,12 @@ export default function BlockchainUploadDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-          <Shield className="mr-2 h-4 w-4" />
-          Protect Content
+        <Button 
+          size="sm"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white w-full sm:w-auto justify-center whitespace-nowrap"
+        >
+          <Shield className="h-4 w-4 mr-1.5" />
+          <span className="hidden sm:inline">Protect </span>Content
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">

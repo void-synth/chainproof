@@ -117,9 +117,13 @@ export const PiracyScanDialog: React.FC<PiracyScanDialogProps> = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="outline" className="gap-2">
-            <Shield className="h-4 w-4" />
-            Scan for Piracy
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="bg-white/70 backdrop-blur border-white/20 hover:bg-white w-full sm:w-auto justify-center whitespace-nowrap"
+          >
+            <Shield className="h-4 w-4 mr-1.5" />
+            <span className="hidden sm:inline">Scan for </span>Piracy
           </Button>
         )}
       </DialogTrigger>
