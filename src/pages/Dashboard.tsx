@@ -15,11 +15,19 @@ import { Input } from "@/components/ui/input";
 import { useDashboardStats, useRecentContent, useRealtimeDashboard } from "@/hooks/use-dashboard";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DebugUpload from "@/components/DebugUpload";
+import BlockchainUploadDialog from "@/components/content/BlockchainUploadDialog";
+import { PiracyScanDialog } from "@/components/piracy/PiracyScanDialog";
+import { PiracyScanDemo } from "@/components/piracy/PiracyScanDemo";
+import { CertificateGenerationDialog } from "@/components/certificates/CertificateGenerationDialog";
+import { CertificatesList } from "@/components/certificates/CertificatesList";
+import { CertificateDemo } from "@/components/certificates/CertificateDemo";
 
 export default function Dashboard() {
   const { data: stats, isLoading: isStatsLoading, error: statsError } = useDashboardStats();
   const { data: recentContent = [], isLoading: isContentLoading } = useRecentContent();
   const [searchQuery, setSearchQuery] = useState("");
+  const [certificateDialogOpen, setCertificateDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   // Enable real-time updates
@@ -68,15 +76,87 @@ export default function Dashboard() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button 
-            onClick={() => navigate("/dashboard/content/new")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Add New Content
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate("/dashboard/content/new")}
+              variant="outline"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Basic Upload
+            </Button>
+            <BlockchainUploadDialog />
+            <PiracyScanDialog />
+            <Button 
+              onClick={() => setCertificateDialogOpen(true)}
+              variant="outline"
+            >
+              <Award className="mr-2 h-4 w-4" />
+              Generate Certificate
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Blockchain Protection Demo */}
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-blue-600" />
+            Blockchain Protection Features
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Shield className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="font-semibold">SHA-256 Hashing</h3>
+              <p className="text-sm text-gray-600">Cryptographic fingerprinting</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Upload className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold">IPFS Distribution</h3>
+              <p className="text-sm text-gray-600">Decentralized storage</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Award className="h-6 w-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold">Polygon Blockchain</h3>
+              <p className="text-sm text-gray-600">Immutable timestamps</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Search className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="font-semibold">AI Piracy Scan</h3>
+              <p className="text-sm text-gray-600">Detect unauthorized copies</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Award className="h-6 w-6 text-yellow-600" />
+              </div>
+              <h3 className="font-semibold">PDF Certificates</h3>
+              <p className="text-sm text-gray-600">Verifiable protection proof</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Piracy Detection Demo */}
+      <PiracyScanDemo />
+
+      {/* Certificate Generation Demo */}
+      <CertificateDemo />
+
+      {/* Certificates Section */}
+      <CertificatesList onGenerateNew={() => setCertificateDialogOpen(true)} />
+
+      {/* Debug Upload Tool */}
+      <DebugUpload />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -194,31 +274,33 @@ export default function Dashboard() {
                       {content.status}
                     </span>
                     {content.blockchain_hash && (
-                      <Shield className="h-4 w-4 text-green-600" title="Blockchain Verified" />
+                      <Shield className="h-4 w-4 text-green-600" />
                     )}
                     <ChevronRight className="h-4 w-4 text-gray-400" />
                   </div>
                 </div>
               ))
-            ) : searchQuery ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No content matches your search</p>
-              </div>
             ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No protected content yet</p>
-                <Button 
-                  className="mt-4"
-                  variant="outline"
-                  onClick={() => navigate("/dashboard/content/new")}
-                >
-                  Protect Your First Content
-                </Button>
+              <div className="text-center py-12">
+                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No content found</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  {searchQuery ? 'No content matches your search.' : 'Get started by uploading your first content.'}
+                </p>
+                <div className="mt-6">
+                  <BlockchainUploadDialog />
+                </div>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Certificate Generation Dialog */}
+      <CertificateGenerationDialog 
+        open={certificateDialogOpen}
+        onOpenChange={setCertificateDialogOpen}
+      />
     </div>
   );
 } 

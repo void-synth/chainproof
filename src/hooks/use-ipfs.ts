@@ -10,9 +10,9 @@ const ipfs = create({
   protocol: "https",
   headers: {
     authorization: `Basic ${Buffer.from(
-      process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID +
+      (import.meta.env.VITE_INFURA_IPFS_PROJECT_ID || '') +
       ":" +
-      process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
+      (import.meta.env.VITE_INFURA_IPFS_PROJECT_SECRET || '')
     ).toString("base64")}`,
   },
 });
@@ -22,6 +22,7 @@ export interface IPFSDetails {
   size: number;
   gateway_url: string;
   pinned_at: string;
+  encryption_key?: string;
 }
 
 export function useIPFS() {

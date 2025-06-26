@@ -20,8 +20,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSupabaseUpload } from "@/hooks/use-supabase-upload";
-import { Upload, X, FileText, Image, Video, Music, File } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useContentProtection } from "@/hooks/use-content-protection";
+import { 
+  Upload, 
+  X, 
+  FileText, 
+  Image, 
+  Video, 
+  Music, 
+  File, 
+  Shield, 
+  Zap,
+  Globe,
+  Lock,
+  CheckCircle,
+  AlertCircle,
+  Loader2
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const ACCEPTED_FILE_TYPES = {
@@ -37,14 +54,66 @@ interface FileWithPreview extends File {
   preview?: string;
 }
 
-export default function UploadDialog() {
+interface ProtectionStep {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  status: 'pending' | 'processing' | 'success' | 'error';
+  optional?: boolean;
+}
+
+export default function BlockchainUploadDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [visibility, setVisibility] = useState<"private" | "public" | "organization">("private");
-  const { upload, isUploading } = useSupabaseUpload();
+  const [enableIPFS, setEnableIPFS] = useState(true);
+  const [enableBlockchain, setEnableBlockchain] = useState(true);
+  
+  const { protectContent, isProtecting } = useContentProtection();
+
+  const [protectionSteps, setProtectionSteps] = useState<ProtectionStep[]>([
+    {
+      id: 'hash',
+      title: 'Generate SHA-256 Hash',
+      description: 'Creating cryptographic fingerprint',
+      icon: Shield,
+      status: 'pending'
+    },
+    {
+      id: 'storage',
+      title: 'Upload to Cloud Storage',
+      description: 'Secure Supabase storage',
+      icon: Upload,
+      status: 'pending'
+    },
+    {
+      id: 'ipfs',
+      title: 'Distribute on IPFS',
+      description: 'Decentralized storage network',
+      icon: Globe,
+      status: 'pending',
+      optional: true
+    },
+    {
+      id: 'blockchain',
+      title: 'Register on Polygon',
+      description: 'Blockchain timestamp & verification',
+      icon: Zap,
+      status: 'pending',
+      optional: true
+    },
+    {
+      id: 'database',
+      title: 'Save Metadata',
+      description: 'Store protection records',
+      icon: Lock,
+      status: 'pending'
+    }
+  ]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles(
@@ -65,64 +134,39 @@ export default function UploadDialog() {
     multiple: true,
   });
 
-  const generateThumbnail = async (file: File): Promise<string | undefined> => {
-    if (file.type.startsWith('image/')) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.readAsDataURL(file);
-      });
-    }
-    
-    if (file.type.startsWith('video/')) {
-      return new Promise((resolve) => {
-        const video = document.createElement('video');
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        
-        video.onloadedmetadata = () => {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-        };
-        
-        video.onseeked = () => {
-          if (context) {
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg'));
-          } else {
-            resolve(undefined);
-          }
-        };
-        
-        video.src = URL.createObjectURL(file);
-        video.currentTime = 1; // Seek to 1 second
-      });
-    }
-    
-    return undefined;
-  };
-
   const handleUpload = async () => {
     try {
+      // Reset protection steps
+      setProtectionSteps(steps => 
+        steps.map(step => ({ 
+          ...step, 
+          status: step.optional && 
+            ((step.id === 'ipfs' && !enableIPFS) || 
+             (step.id === 'blockchain' && !enableBlockchain)) 
+            ? 'pending' as const 
+            : 'pending' as const 
+        }))
+      );
+
       for (const file of files) {
-        const thumbnail = await generateThumbnail(file);
-        
-        await upload({
+        await protectContent.mutateAsync({
           file,
           metadata: {
             title: title || file.name,
             description,
             category,
             visibility,
-            tags: [], // Could add tag input to form
+            tags: [],
           },
+          enableIPFS,
+          enableBlockchain,
         });
       }
       
       setIsOpen(false);
       resetForm();
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.error("Protection failed:", error);
     }
   };
 
@@ -132,6 +176,9 @@ export default function UploadDialog() {
     setDescription("");
     setCategory("");
     setVisibility("private");
+    setProtectionSteps(steps => 
+      steps.map(step => ({ ...step, status: 'pending' as const }))
+    );
   };
 
   const removeFile = (index: number) => {
@@ -153,64 +200,74 @@ export default function UploadDialog() {
     return <File className="h-8 w-8 text-gray-500" />;
   };
 
-  const getFileDimensions = async (file: File): Promise<{ width: number; height: number } | undefined> => {
-    if (file.type.startsWith('image/')) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          resolve({ width: img.width, height: img.height });
-        };
-        img.src = URL.createObjectURL(file);
-      });
-    }
-    
-    if (file.type.startsWith('video/')) {
-      return new Promise((resolve) => {
-        const video = document.createElement('video');
-        video.onloadedmetadata = () => {
-          resolve({ width: video.videoWidth, height: video.videoHeight });
-        };
-        video.src = URL.createObjectURL(file);
-      });
-    }
-    
-    return undefined;
+  const StepIcon = ({ step }: { step: ProtectionStep }) => {
+    if (step.status === 'processing') return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
+    if (step.status === 'success') return <CheckCircle className="h-5 w-5 text-green-500" />;
+    if (step.status === 'error') return <AlertCircle className="h-5 w-5 text-red-500" />;
+    return <step.icon className="h-5 w-5 text-gray-400" />;
   };
 
-  const getFileDuration = async (file: File): Promise<number | undefined> => {
-    if (file.type.startsWith('video/') || file.type.startsWith('audio/')) {
-      return new Promise((resolve) => {
-        const media = file.type.startsWith('video/') 
-          ? document.createElement('video')
-          : document.createElement('audio');
-        
-        media.onloadedmetadata = () => {
-          resolve(media.duration);
-        };
-        media.src = URL.createObjectURL(file);
-      });
-    }
-    
-    return undefined;
-  };
+  const totalProtectionScore = 50 + (enableIPFS ? 25 : 0) + (enableBlockchain ? 25 : 0);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Upload className="mr-2 h-4 w-4" />
-          Upload Content
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Shield className="mr-2 h-4 w-4" />
+          Protect Content
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Upload Content</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-blue-600" />
+            Blockchain Content Protection
+          </DialogTitle>
           <DialogDescription>
-            Upload files to protect them using blockchain and IPFS technology.
+            Protect your content with SHA-256 hashing, IPFS distribution, and Polygon blockchain registration.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Protection Features */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Protection Features</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Globe className="h-4 w-4 text-blue-500" />
+                  <Label htmlFor="ipfs-toggle">IPFS Distribution</Label>
+                </div>
+                <Switch 
+                  id="ipfs-toggle"
+                  checked={enableIPFS} 
+                  onCheckedChange={setEnableIPFS}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Zap className="h-4 w-4 text-purple-500" />
+                  <Label htmlFor="blockchain-toggle">Blockchain Registration</Label>
+                </div>
+                <Switch 
+                  id="blockchain-toggle"
+                  checked={enableBlockchain} 
+                  onCheckedChange={setEnableBlockchain}
+                />
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Protection Score:</span>
+                  <span className="text-lg font-bold text-green-600">{totalProtectionScore}%</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Dropzone */}
           <div
             {...getRootProps()}
@@ -235,7 +292,7 @@ export default function UploadDialog() {
               {files.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                 >
                   <div className="flex items-center space-x-3">
                     <FileIcon type={file.type} />
@@ -258,8 +315,33 @@ export default function UploadDialog() {
             </div>
           )}
 
+          {/* Protection Steps */}
+          {isProtecting && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Protection Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {protectionSteps.map((step) => (
+                    <div key={step.id} className="flex items-center space-x-3">
+                      <StepIcon step={step} />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{step.title}</p>
+                        <p className="text-xs text-gray-500">{step.description}</p>
+                      </div>
+                      {step.optional && (
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">Optional</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Metadata Form */}
-          {files.length > 0 && (
+          {files.length > 0 && !isProtecting && (
             <div className="space-y-4">
               <div>
                 <Label htmlFor="title">Title</Label>
@@ -302,7 +384,7 @@ export default function UploadDialog() {
                   <Label htmlFor="visibility">Visibility</Label>
                   <Select value={visibility} onValueChange={(value: "private" | "public" | "organization") => setVisibility(value)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select visibility" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="private">Private</SelectItem>
@@ -320,11 +402,22 @@ export default function UploadDialog() {
           <Button variant="outline" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={handleUpload}
-            disabled={isUploading || files.length === 0}
+          <Button 
+            onClick={handleUpload} 
+            disabled={files.length === 0 || isProtecting}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            {isUploading ? "Uploading..." : "Upload"}
+            {isProtecting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Protecting...
+              </>
+            ) : (
+              <>
+                <Shield className="mr-2 h-4 w-4" />
+                Protect Content
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

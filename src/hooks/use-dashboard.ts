@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface ContentItem {
   id: string;
@@ -195,30 +195,31 @@ export function useRecentContent() {
 export function useRealtimeDashboard() {
   const queryClient = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
+    console.log("⚠️ Realtime dashboard updates temporarily disabled due to connection issues");
+    
+    // TODO: Re-enable once realtime connection issues are resolved
+    /*
     const channel = supabase
-      .channel("dashboard_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "content",
-        },
+      .channel('dashboard-updates')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'content' },
         (payload) => {
-          console.log("Realtime update received:", payload);
-          // Refetch dashboard data when changes occur
-          queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-          queryClient.invalidateQueries({ queryKey: ["recent-content"] });
+          console.log('Content table change:', payload);
+          queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+          queryClient.invalidateQueries({ queryKey: ['recent-content'] });
         }
       )
       .subscribe((status) => {
-        console.log("Realtime subscription status:", status);
+        console.log('Realtime subscription status:', status);
       });
 
     return () => {
-      console.log("Cleaning up realtime subscription");
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
+    */
+    
+    // Return cleanup function that does nothing for now
+    return () => {};
   }, [queryClient]);
 } 

@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "imports": {
+    "supabase": "jsr:@supabase/supabase-js@2",
+    "cors": "./_shared/cors.ts"
+  }
+} 
