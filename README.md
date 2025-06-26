@@ -1,73 +1,80 @@
-# Welcome to your Lovable project
+# 🔐 ChainProof
 
-## Project info
+**AI + Blockchain-Powered Copyright Protection for Creators**
 
-**URL**: https://lovable.dev/projects/44720274-10ff-4e76-bed6-fa3912528a4d
+[🚀 Live Demo](https://chain-proof-seven.vercel.app)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 📌 Overview
 
-**Use Lovable**
+ChainProof gives creators instant, legally verifiable copyright protection using a powerful combination of AI and blockchain.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/44720274-10ff-4e76-bed6-fa3912528a4d) and start prompting.
+With just one upload, creators can:
+- ✅ Get a blockchain timestamp and IPFS link
+- ✅ Run AI similarity checks for piracy detection
+- ✅ Receive a proof-of-ownership certificate (PDF + QR)
+- ✅ Monitor piracy alerts in a real-time dashboard
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 🧠 Problem Statement
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Millions of creators share original content online — but most have no way to **prove ownership** or **catch theft** early. Traditional copyright registration is slow, expensive, and limited by geography.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 💡 Solution
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+ChainProof solves this with a simple flow:
+1. Upload content
+2. Hash + store on blockchain & IPFS
+3. AI scans the web for similar content
+4. Generate proof certificate & monitor misuse
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🖥 Tech Stack
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+| Layer         | Tool / Service                        |
+|--------------|----------------------------------------|
+| Frontend     | React, Tailwind CSS                    |
+| Backend      | Node.js, Express (Planned)             |
+| Storage      | IPFS (via Web3.storage or Pinata)      |
+| Blockchain   | Polygon (Mumbai Testnet)               |
+| AI Scanning  | OpenAI GPT API, Google Search API      |
+| Certificate  | PDFKit, QRCode (Planned)               |
+| Auth         | JWT / Firebase Auth (Planned)          |
+| Hosting      | Vercel                                 |
+
+---
+
+## 📦 Features
+
+### ✅ Implemented (Frontend)
+- Landing page with feature overview and CTA
+- Responsive design (React + Tailwind)
+- Page flow explanation for judges & testers
+
+### 🔧 In Progress / To Do (Backend)
+- [ ] Blockchain file hashing + IPFS upload
+- [ ] AI similarity detection via GPT + Google
+- [ ] PDF certificate generation
+- [ ] User dashboard for uploads, certs, alerts
+- [ ] Authentication & session handling
+- [ ] Email/piracy alert notifications
+
+---
+
+## 🚀 Getting Started
+
+### Clone the repo
+```bash
+git clone https://github.com/YOUR_USERNAME/chainproof.git
+cd chainproof
+
+
+cd frontend
+npm install
 npm run dev
-```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/44720274-10ff-4e76-bed6-fa3912528a4d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
