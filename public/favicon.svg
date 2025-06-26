@@ -1,63 +1,83 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs>
-    <!-- Simplified gradients for better compatibility -->
-    <radialGradient id="bg" cx="0.3" cy="0.3">
-      <stop offset="0%" stop-color="#374151"/>
-      <stop offset="100%" stop-color="#1f2937"/>
+    <!-- Modern gradient backgrounds -->
+    <radialGradient id="mainBg" cx="0.4" cy="0.3">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
     </radialGradient>
     
-    <linearGradient id="shield" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#60a5fa"/>
+    <linearGradient id="hexShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#1d4ed8"/>
       <stop offset="100%" stop-color="#1e40af"/>
+    </linearGradient>
+    
+    <linearGradient id="chainLink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#cbd5e0"/>
     </linearGradient>
   </defs>
   
-  <!-- Background circle -->
-  <circle cx="16" cy="16" r="15" fill="url(#bg)" stroke="#4b5563" stroke-width="0.5"/>
+  <!-- Main background -->
+  <circle cx="16" cy="16" r="15.5" fill="url(#mainBg)" stroke="#334155" stroke-width="1"/>
   
-  <!-- Main shield -->
-  <path d="M16 5 L24 9 L24 17 C24 21 20 25 16 25 C12 25 8 21 8 17 L8 9 Z" 
-        fill="url(#shield)" stroke="#1e40af" stroke-width="0.5"/>
+  <!-- Hexagonal shield shape -->
+  <path d="M16 4 L23 7.5 L23 16.5 L16 20 L9 16.5 L9 7.5 Z" 
+        fill="url(#hexShield)" 
+        stroke="#1e40af" 
+        stroke-width="0.5"/>
   
-  <!-- Shield highlight -->
-  <path d="M16 7 L21 10 L21 16 C21 19 18.5 21.5 16 21.5 C13.5 21.5 11 19 11 16 L11 10 Z" 
-        fill="none" stroke="#93c5fd" stroke-width="0.4" opacity="0.7"/>
+  <!-- Inner hex highlight -->
+  <path d="M16 6 L21 9 L21 15 L16 18 L11 15 L11 9 Z" 
+        fill="none" 
+        stroke="#60a5fa" 
+        stroke-width="0.4" 
+        opacity="0.8"/>
   
-  <!-- Chain links -->
-  <g fill="#f3f4f6" stroke="#9ca3af" stroke-width="1">
-    <!-- Left link -->
-    <ellipse cx="12.5" cy="11.5" rx="1.5" ry="2" transform="rotate(45 12.5 11.5)"/>
-    <ellipse cx="12.5" cy="11.5" rx="1" ry="1.3" transform="rotate(45 12.5 11.5)" fill="none" stroke="#ffffff" stroke-width="0.4"/>
+  <!-- Chain pattern inside shield -->
+  <g stroke="url(#chainLink)" fill="none" stroke-width="1.2" stroke-linecap="round">
+    <!-- Horizontal chain links -->
+    <ellipse cx="13.5" cy="11" rx="1.2" ry="0.8"/>
+    <ellipse cx="18.5" cy="11" rx="1.2" ry="0.8"/>
+    <ellipse cx="16" cy="13.5" rx="1.2" ry="0.8"/>
     
-    <!-- Right link -->
-    <ellipse cx="19.5" cy="11.5" rx="1.5" ry="2" transform="rotate(-45 19.5 11.5)"/>
-    <ellipse cx="19.5" cy="11.5" rx="1" ry="1.3" transform="rotate(-45 19.5 11.5)" fill="none" stroke="#ffffff" stroke-width="0.4"/>
-    
-    <!-- Center link -->
-    <ellipse cx="16" cy="15" rx="1.5" ry="2"/>
-    <ellipse cx="16" cy="15" rx="1" ry="1.3" fill="none" stroke="#ffffff" stroke-width="0.4"/>
+    <!-- Connecting elements -->
+    <line x1="14.7" y1="11" x2="17.3" y2="11"/>
+    <line x1="16" y1="12.7" x2="16" y2="14.3"/>
   </g>
   
-  <!-- Security lock -->
-  <g>
-    <rect x="14.8" y="20.2" width="2.4" height="1.6" rx="0.2" fill="#6b7280"/>
-    <path d="M15.2 20.2 L15.2 19.2 C15.2 18.7 15.6 18.4 16 18.4 C16.4 18.4 16.8 18.7 16.8 19.2 L16.8 20.2" 
-          fill="none" stroke="#6b7280" stroke-width="0.6"/>
+  <!-- Central security symbol -->
+  <g fill="#1f2937" stroke="#374151">
+    <!-- Lock body -->
+    <rect x="14.5" y="21" width="3" height="2" rx="0.3" fill="#4b5563"/>
+    <!-- Lock shackle -->
+    <path d="M15 21 L15 19.5 C15 18.7 15.4 18.2 16 18.2 C16.6 18.2 17 18.7 17 19.5 L17 21" 
+          fill="none" stroke="#4b5563" stroke-width="0.8"/>
   </g>
   
   <!-- Verification checkmark -->
-  <path d="M13 17.2 L14.8 19 L19 14.8" 
+  <path d="M12.8 16.5 L14.5 18.2 L19.2 13.5" 
         fill="none" 
-        stroke="#22c55e" 
-        stroke-width="1.8" 
+        stroke="#10b981" 
+        stroke-width="2" 
         stroke-linecap="round" 
         stroke-linejoin="round"/>
   
-  <!-- Corner accents -->
-  <g opacity="0.2" fill="#60a5fa">
-    <circle cx="6" cy="6" r="0.8"/>
-    <circle cx="26" cy="26" r="0.8"/>
-    <rect x="25.2" y="5.2" width="1.6" height="1.6" rx="0.3"/>
-    <rect x="5.2" y="25.2" width="1.6" height="1.6" rx="0.3"/>
+  <!-- Modern corner accents -->
+  <g opacity="0.3" fill="#3b82f6">
+    <!-- Top corners -->
+    <polygon points="4,4 8,4 4,8"/>
+    <polygon points="28,4 24,4 28,8"/>
+    <!-- Bottom corners -->
+    <polygon points="4,28 4,24 8,28"/>
+    <polygon points="28,28 28,24 24,28"/>
+  </g>
+  
+  <!-- Subtle tech pattern -->
+  <g opacity="0.1" stroke="#3b82f6" stroke-width="0.5" fill="none">
+    <circle cx="6" cy="16" r="1"/>
+    <circle cx="26" cy="16" r="1"/>
+    <rect x="15.5" y="2" width="1" height="2"/>
+    <rect x="15.5" y="28" width="1" height="2"/>
   </g>
 </svg> 
