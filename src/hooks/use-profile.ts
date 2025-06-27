@@ -39,24 +39,51 @@ export function useUpdateProfile() {
 
   return useMutation({
     mutationFn: async (data: Partial<Profile>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
+      console.log("🔄 Starting profile update with data:", data);
+      
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error("❌ Auth error:", userError);
+        throw new Error(`Authentication error: ${userError.message}`);
+      }
+      if (!user) {
+        console.error("❌ No user found");
+        throw new Error("No user found");
+      }
+      
+      console.log("✅ User authenticated:", user.id);
 
       // Update email in auth if it's being changed
-      if (data.email) {
+      if (data.email && data.email !== user.email) {
+        console.log("📧 Updating email in auth...");
         const { error: emailError } = await supabase.auth.updateUser({
           email: data.email,
         });
-        if (emailError) throw emailError;
+        if (emailError) {
+          console.error("❌ Email update error:", emailError);
+          throw new Error(`Failed to update email: ${emailError.message}`);
+        }
+        console.log("✅ Email updated in auth");
       }
 
       // Update profile data
+      console.log("💾 Updating profile data...");
+      const updateData = {
+        ...data,
+        updated_at: new Date().toISOString()
+      };
+      
       const { error } = await supabase
         .from("profiles")
-        .update(data)
+        .update(updateData)
         .eq("id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Profile update error:", error);
+        throw new Error(`Failed to update profile: ${error.message}`);
+      }
+      
+      console.log("✅ Profile updated successfully");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
@@ -82,32 +109,90 @@ export function useUploadAvatar() {
 
   return useMutation({
     mutationFn: async (file: File) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
+      console.log("🖼️ Starting avatar upload for file:", file.name, "Size:", file.size);
+      
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error("❌ Auth error:", userError);
+        throw new Error(`Authentication error: ${userError.message}`);
+      }
+      if (!user) {
+        console.error("❌ No user found");
+        throw new Error("No user found");
+      }
+      
+      console.log("✅ User authenticated:", user.id);
+
+      // Validate file type and size
+      if (!file.type.startsWith('image/')) {
+        throw new Error("File must be an image");
+      }
+      
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new Error("Image size must be less than 5MB");
+      }
+
+      // Delete old avatar if exists
+      const { data: oldProfile } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .single();
+
+      if (oldProfile?.avatar_url) {
+        const oldFileName = oldProfile.avatar_url.split("/").pop();
+        if (oldFileName) {
+          console.log("🗑️ Deleting old avatar:", oldFileName);
+          await supabase.storage
+            .from("avatars")
+            .remove([oldFileName]);
+        }
+      }
 
       // Upload file to storage
       const fileExt = file.name.split(".").pop();
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      
+      console.log("📤 Uploading to storage:", fileName);
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("❌ Storage upload error:", uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+      
+      console.log("✅ File uploaded successfully");
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
         .getPublicUrl(fileName);
+        
+      console.log("🔗 Generated public URL:", publicUrl);
 
       // Update profile with new avatar URL
+      console.log("💾 Updating profile with new avatar URL...");
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ 
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString()
+        })
         .eq("id", user.id);
 
-      if (updateError) throw updateError;
-
+      if (updateError) {
+        console.error("❌ Profile update error:", updateError);
+        throw new Error(`Failed to update profile: ${updateError.message}`);
+      }
+      
+      console.log("✅ Avatar updated successfully");
       return publicUrl;
     },
     onSuccess: () => {

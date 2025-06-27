@@ -112,15 +112,15 @@ export function useSupabaseUpload() {
         storage_path: uploadData.path,
         status: 'draft',
         protection_score: 0,
-        file_size: file.size,
-        mime_type: file.type,
         tags: metadata.tags || [],
         metadata: {
           originalName: file.name,
           uploadedAt: new Date().toISOString(),
+          fileSize: file.size, // Store in metadata instead of separate field
+          mimeType: file.type, // Store in metadata instead of separate field
+          dimensions: fileMetadata.dimensions, // Store in metadata instead of separate field
           ...fileMetadata
-        },
-        file_dimensions: fileMetadata.dimensions || null
+        }
       };
 
       const { data: insertedContent, error: insertError } = await supabase

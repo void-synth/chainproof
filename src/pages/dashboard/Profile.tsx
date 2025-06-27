@@ -48,9 +48,26 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB limit for avatars)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
     try {
       setIsUploading(true);
       await uploadAvatar.mutateAsync(file);
+      // Clear the input so the same file can be selected again
+      event.target.value = '';
+    } catch (error) {
+      console.error('Avatar upload failed:', error);
     } finally {
       setIsUploading(false);
     }
@@ -73,22 +90,22 @@ export default function Profile() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Profile</h2>
-        <p className="text-gray-500">Manage your account settings</p>
+    <div className="space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
+      <div className="text-center sm:text-left">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Profile</h2>
+        <p className="text-gray-500 mt-1 sm:mt-2">Manage your account settings</p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4 sm:gap-6">
         {/* Avatar Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Profile Picture</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Profile Picture</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center gap-6">
-            <Avatar className="h-24 w-24">
+          <CardContent className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
               <AvatarImage src={profile?.avatar_url || ""} />
-              <AvatarFallback>
+              <AvatarFallback className="text-lg sm:text-xl">
                 {profile?.full_name
                   ?.split(" ")
                   .map((n) => n[0])
@@ -96,18 +113,21 @@ export default function Profile() {
                   .toUpperCase() || "?"}
               </AvatarFallback>
             </Avatar>
-            <div className="space-x-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <Button
                 variant="outline"
                 onClick={() => document.getElementById("avatar-upload")?.click()}
                 disabled={isUploading}
+                className="w-full sm:w-auto"
+                size="sm"
               >
                 {isUploading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4 mr-2" />
                 )}
-                Upload New
+                <span className="hidden sm:inline">Upload New</span>
+                <span className="sm:hidden">Upload</span>
                 <input
                   id="avatar-upload"
                   type="file"
@@ -122,6 +142,8 @@ export default function Profile() {
                   variant="outline"
                   onClick={handleAvatarDelete}
                   disabled={deleteAvatar.isPending}
+                  className="w-full sm:w-auto"
+                  size="sm"
                 >
                   <Trash className="h-4 w-4 mr-2" />
                   Remove
@@ -134,53 +156,68 @@ export default function Profile() {
         {/* Profile Form */}
         <Card>
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Personal Information</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="full_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="Enter your email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="company"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your company" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <FormField
+                    control={form.control}
+                    name="full_name"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel className="text-sm sm:text-base">Full Name</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter your name" 
+                            {...field} 
+                            className="h-10 sm:h-11"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel className="text-sm sm:text-base">Email</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="email" 
+                            placeholder="Enter your email" 
+                            {...field} 
+                            className="h-10 sm:h-11"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="company"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel className="text-sm sm:text-base">Company</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter your company" 
+                            {...field} 
+                            className="h-10 sm:h-11"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-10 sm:h-11 text-sm sm:text-base"
                   disabled={updateProfile.isPending}
                 >
                   {updateProfile.isPending ? (

@@ -104,9 +104,9 @@ export function useContentProtection() {
           }
         }
 
-        // Step 5: Generate unique content ID
-        const contentId = `content_${user.id}_${Date.now()}_${Math.random().toString(36).substring(2)}`;
-        console.log("5️⃣ Generated content ID:", contentId);
+        // Step 5: Generate unique content ID for tracking (stored in metadata)
+        const customContentId = `content_${user.id}_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+        console.log("5️⃣ Generated custom content ID:", customContentId);
 
         // Step 6: Register on blockchain (optional)
         let blockchainResult: any = null;
@@ -114,7 +114,7 @@ export function useContentProtection() {
           console.log("6️⃣ Registering on Polygon blockchain...");
           try {
             blockchainResult = await registerOnBlockchain.mutateAsync({
-              contentId,
+              contentId: customContentId,
               file,
               ipfsHash: ipfsResult.cid,
             });
@@ -131,7 +131,7 @@ export function useContentProtection() {
         // Step 8: Save to database
         console.log("8️⃣ Saving to database...");
         const contentData = {
-          id: contentId,
+          // Let database generate UUID automatically - don't specify id
           user_id: user.id,
           title: metadata.title || file.name,
           description: metadata.description || '',
@@ -141,13 +141,15 @@ export function useContentProtection() {
           storage_path: uploadData.path,
           status: 'protected',
           protection_score: calculateProtectionScore(enableIPFS, enableBlockchain, !!blockchainResult),
-          file_size: file.size,
-          mime_type: file.type,
           tags: metadata.tags || [],
           metadata: {
+            customContentId, // Store custom ID in metadata
             originalName: file.name,
             uploadedAt: new Date().toISOString(),
             fileHash,
+            fileSize: file.size, // Store in metadata instead of separate field
+            mimeType: file.type, // Store in metadata instead of separate field
+            contentHash: fileHash, // Store in metadata instead of separate field
             ipfs: ipfsResult ? {
               cid: ipfsResult.cid,
               url: ipfsResult.url,
@@ -167,13 +169,12 @@ export function useContentProtection() {
               },
               protectedAt: new Date().toISOString(),
             },
+            dimensions: fileMetadata.dimensions || null,
             ...fileMetadata
           },
-          file_dimensions: fileMetadata.dimensions || null,
-          // New blockchain-specific fields
+          // Blockchain-specific fields that exist in schema
           blockchain_hash: blockchainResult?.transactionHash || null,
           ipfs_hash: ipfsResult?.cid || null,
-          content_hash: fileHash,
         };
 
         const { data: insertedContent, error: insertError } = await supabase
@@ -187,7 +188,7 @@ export function useContentProtection() {
 
         // Step 9: Return comprehensive result
         const result: ProtectionResult = {
-          contentId: insertedContent.id,
+          contentId: insertedContent.id, // Use database-generated UUID
           fileHash,
           ipfsHash: ipfsResult?.cid,
           ipfsUrl: ipfsResult?.url,

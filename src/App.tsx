@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import Content from "./pages/dashboard/Content";
+import NewContent from "./pages/dashboard/NewContent";
 import Settings from "./pages/dashboard/Settings";
 import Profile from "./pages/dashboard/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -45,6 +46,16 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <Content />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/content/new"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <NewContent />
                 </DashboardLayout>
               </ProtectedRoute>
             }
